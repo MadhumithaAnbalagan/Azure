@@ -1,0 +1,19 @@
+Import-Module Azurerm
+Login-AzureRmAccount -SubscriptionName "NA Non-production"
+$KeyVaults= Get-AzureRmKeyVault 
+$DEVVault=@()
+
+foreach ($KeyVault in $KeyVaults) 
+{ 
+   $Vaults =  Get-AzureRmKeyVault -VaultName $KeyVault.VaultName
+   if($Vaults.Tags -ne $null)
+   {
+
+    $Vaults.Tags.GetEnumerator() | ForEach-Object {
+    [string]$Value=$_.value 
+    if($Value -like "*DEV*"){$DEVVault += ($Vaults | Select-Object -Property "VaultName","ResourceGroupName","Location","EnableSoftDelete") } }
+    
+   }
+   }
+
+     $DEVVault | Export-CSV "D:\Temp\KeyVaultDEV.csv"
